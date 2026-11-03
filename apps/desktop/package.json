@@ -1,0 +1,15 @@
+{
+  "name": "@harbor/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun scripts/electrobun.ts dev",
+    "build": "bun scripts/electrobun.ts build --env=stable",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "bun test src"
+  },
+  "devDependencies": {
+    "electrobun": "1.18.1"
+  }
+}

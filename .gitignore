@@ -3,3 +3,7 @@ dist/
 *.db
 .harbor/
 .DS_Store
+*.bun-build
+apps/desktop/build/
+apps/desktop/artifacts/
+*.tsbuildinfo

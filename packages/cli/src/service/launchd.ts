@@ -1,15 +1,12 @@
 import { mkdirSync, unlinkSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { runServiceCommand, serviceArguments, serviceContext } from "./context";
+import type { ServiceContext } from "./context";
 
 const LABEL = "org.harbor.server";
 
-export interface LaunchdContext {
-  bunPath: string;
-  cliEntry: string;
-  harborHome: string;
-}
+export type LaunchdContext = ServiceContext;
 
 function escapeXml(value: string): string {
   return value
@@ -18,7 +15,8 @@ function escapeXml(value: string): string {
     .replace(/>/g, "&gt;");
 }
 
-export function renderPlist({ bunPath, cliEntry, harborHome }: LaunchdContext): string {
+export function renderPlist(context: LaunchdContext): string {
+  const { harborHome, path, port, dbPath } = context;
   const outLog = join(harborHome, "logs", "server.out.log");
   const errLog = join(harborHome, "logs", "server.err.log");
 
@@ -30,9 +28,7 @@ export function renderPlist({ bunPath, cliEntry, harborHome }: LaunchdContext): 
   <string>${LABEL}</string>
   <key>ProgramArguments</key>
   <array>
-    <string>${escapeXml(bunPath)}</string>
-    <string>${escapeXml(cliEntry)}</string>
-    <string>serve</string>
+${serviceArguments(context).map((arg) => `    <string>${escapeXml(arg)}</string>`).join("\n")}
   </array>
   <key>RunAtLoad</key>
   <true/>
@@ -44,7 +40,13 @@ export function renderPlist({ bunPath, cliEntry, harborHome }: LaunchdContext): 
   <key>EnvironmentVariables</key>
   <dict>
     <key>HARBOR_HOME</key>
-    <string>${escapeXml(harborHome)}</string>
+    <string>${escapeXml(harborHome)}</string>${path !== undefined ? `
+    <key>PATH</key>
+    <string>${escapeXml(path)}</string>` : ""}${port !== undefined ? `
+    <key>HARBOR_PORT</key>
+    <string>${escapeXml(port)}</string>` : ""}${dbPath !== undefined ? `
+    <key>HARBOR_DB_PATH</key>
+    <string>${escapeXml(dbPath)}</string>` : ""}
   </dict>
   <key>StandardOutPath</key>
   <string>${escapeXml(outLog)}</string>
@@ -59,35 +61,24 @@ function plistPath(): string {
   return join(homedir(), "Library", "LaunchAgents", `${LABEL}.plist`);
 }
 
-function context(): LaunchdContext {
-  const bunPath = process.execPath;
-  const cliEntry = fileURLToPath(new URL("../index.ts", import.meta.url));
-  const harborHome = process.env.HARBOR_HOME ?? join(homedir(), ".harbor");
-  return { bunPath, cliEntry, harborHome };
-}
-
-async function run(cmd: string[]): Promise<number> {
-  const proc = Bun.spawn(cmd, { stdout: "ignore", stderr: "ignore" });
-  return proc.exited;
-}
-
 export async function installLaunchd(): Promise<void> {
-  const { bunPath, cliEntry, harborHome } = context();
+  const context = serviceContext();
+  const { harborHome } = context;
   mkdirSync(join(harborHome, "logs"), { recursive: true });
 
-  const plist = renderPlist({ bunPath, cliEntry, harborHome });
+  const plist = renderPlist(context);
   const path = plistPath();
   mkdirSync(join(homedir(), "Library", "LaunchAgents"), { recursive: true });
   writeFileSync(path, plist);
 
   const uid = process.getuid?.() ?? 0;
-  await run(["launchctl", "bootout", `gui/${uid}/${LABEL}`]);
-  await run(["launchctl", "bootstrap", `gui/${uid}`, path]);
+  await runServiceCommand(["launchctl", "bootout", `gui/${uid}/${LABEL}`], false);
+  await runServiceCommand(["launchctl", "bootstrap", `gui/${uid}`, path]);
 }
 
 export async function uninstallLaunchd(): Promise<void> {
   const uid = process.getuid?.() ?? 0;
-  await run(["launchctl", "bootout", `gui/${uid}/${LABEL}`]);
+  await runServiceCommand(["launchctl", "bootout", `gui/${uid}/${LABEL}`], false);
   try {
     unlinkSync(plistPath());
   } catch {
@@ -97,6 +88,6 @@ export async function uninstallLaunchd(): Promise<void> {
 
 export async function launchdStatus(): Promise<{ registered: boolean }> {
   const uid = process.getuid?.() ?? 0;
-  const code = await run(["launchctl", "print", `gui/${uid}/${LABEL}`]);
+  const code = await runServiceCommand(["launchctl", "print", `gui/${uid}/${LABEL}`], false);
   return { registered: code === 0 };
 }

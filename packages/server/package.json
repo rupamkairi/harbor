@@ -1,5 +1,5 @@
 {
-  "name": "@weave/server",
+  "name": "@harbor/server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -14,16 +14,16 @@
   },
   "dependencies": {
     "@libsql/client": "^0.15.0",
-    "@weave/shared": "workspace:*",
     "croner": "^10.0.1",
     "fflate": "^0.8.3",
     "nanotar": "^0.3.0",
     "smol-toml": "^1.7.0",
     "yaml": "^2.7.0",
-    "zod": "^4.0.0"
+    "zod": "^4.0.0",
+    "@harbor/shared": "workspace:*"
   },
   "devDependencies": {
-    "bun-types": "latest"
+    "bun-types": "1.4.4"
   },
   "optionalDependencies": {
     "bun-pty": "^0.4.10",

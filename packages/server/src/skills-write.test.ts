@@ -32,21 +32,21 @@ afterEach(async () => {
 });
 
 describe("skill-write", () => {
-  it("reports a per-target error when the agent has no verified skill location", async () => {
+  it("reports a per-target error when project scope has no project ID", async () => {
     const { db, root } = await createTestDb();
     const sourceDir = await writeSkillDir(root, "source");
 
     const response = await installSkillFromDir(db, {
       sourceDir,
       skillName: "demo",
-      targets: [{ agentId: "codex", scope: "global" }],
+      targets: [{ agentId: "codex", scope: "project" }],
       source: { kind: "test" },
     });
 
     expect(response.rescanned).toBe(false);
     expect(response.results).toHaveLength(1);
     expect(response.results[0]?.ok).toBe(false);
-    expect(response.results[0]?.error).toMatch(/no verified skill location/i);
+    expect(response.results[0]?.error).toMatch(/projectId is required/i);
   });
 
   it("installs into claude-code's project skill root and records an audit row", async () => {

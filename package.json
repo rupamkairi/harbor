@@ -1,18 +1,30 @@
 {
   "name": "harbor",
   "private": true,
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "bun run dev:server & bun run dev:web",
+    "dev": "bun scripts/dev.ts",
     "dev:server": "bun --watch packages/server/src/index.ts",
     "dev:web": "bun run --cwd apps/web dev",
     "harbor": "bun packages/cli/src/index.ts",
-    "build": "bun run --filter '*' build",
-    "package": "bun run --cwd apps/web build && bun build --compile packages/cli/src/index.ts --outfile dist/harbor && rm -rf dist/web-dist && cp -r apps/web/dist dist/web-dist",
-    "typecheck": "bun x tsc --noEmit -p packages/shared/tsconfig.json && bun x tsc --noEmit -p packages/server/tsconfig.json && bun x tsc --noEmit -p packages/cli/tsconfig.json && bun x tsc --noEmit -p packages/mcp/tsconfig.json && bun run --cwd apps/web check"
+    "build": "bun run package:desktop",
+    "package": "bun run package:cli",
+    "typecheck": "bun x tsc --noEmit -p packages/shared/tsconfig.json && bun x tsc --noEmit -p packages/server/tsconfig.json && bun x tsc --noEmit -p packages/cli/tsconfig.json && bun x tsc --noEmit -p packages/mcp/tsconfig.json && bun run --cwd apps/web check && bun x tsc --noEmit -p apps/desktop/tsconfig.json && bun x tsc --noEmit -p scripts/tsconfig.json",
+    "package:cli": "bun scripts/package-cli.ts",
+    "test": "bun test",
+    "dev:desktop": "bun run package:cli && bun run --cwd apps/desktop dev",
+    "package:desktop": "bun scripts/package-desktop.ts",
+    "clean": "bun scripts/clean.ts"
   },
   "devDependencies": {
-    "bun-types": "^1.3.14",
-    "typescript": "^5"
+    "bun-types": "1.4.4",
+    "typescript": "~6.0.2"
+  },
+  "packageManager": "bun@1.4.4",
+  "engines": {
+    "bun": ">=1.4.4"
   }
 }

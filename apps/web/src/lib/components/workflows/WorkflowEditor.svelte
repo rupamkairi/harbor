@@ -46,7 +46,7 @@
 		return initial;
 	}
 
-	function cloneInitialValue<T>(value: T): T {
+	function cloneInitialValue<T>(value: T) {
 		return structuredClone($state.snapshot(value));
 	}
 
