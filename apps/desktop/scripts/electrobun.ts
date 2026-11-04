@@ -11,7 +11,15 @@ async function run(command: string[], quiet = false) {
     stdout: quiet ? "ignore" : "inherit",
     stderr: quiet ? "ignore" : "inherit",
   });
-  return await child.exited;
+  const stop = () => child.kill("SIGTERM");
+  process.on("SIGINT", stop);
+  process.on("SIGTERM", stop);
+  try {
+    return await child.exited;
+  } finally {
+    process.off("SIGINT", stop);
+    process.off("SIGTERM", stop);
+  }
 }
 
 if (!existsSync(binary)) {

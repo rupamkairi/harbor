@@ -35,6 +35,14 @@
   ];
 
   const path = $derived(getPath());
+  const sidebar = Sidebar.useSidebar();
+  const isActive = (href: string) => path === href || (href !== "/" && path.startsWith(`${href}/`));
+
+  function closeMobileNavigation(event: MouseEvent) {
+    if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+      sidebar.setOpenMobile(false);
+    }
+  }
 </script>
 
 <Sidebar.Root collapsible="icon">
@@ -54,6 +62,7 @@
     <ProjectSwitcher />
   </Sidebar.Header>
   <Sidebar.Content class="px-1">
+    <nav aria-label="Main navigation">
     <Sidebar.Group class="px-1 py-2">
       <Sidebar.GroupLabel>Workspace</Sidebar.GroupLabel>
       <Sidebar.GroupContent>
@@ -61,11 +70,11 @@
           {#each navItems as item (item.href)}
             <Sidebar.MenuItem>
               <Sidebar.MenuButton
-                isActive={path === item.href}
+                isActive={isActive(item.href)}
                 tooltipContent={item.label}
               >
                 {#snippet child({ props })}
-                  <a href={item.href} use:link {...props}>
+                  <a href={item.href} use:link {...props} aria-current={isActive(item.href) ? "page" : undefined} onclick={closeMobileNavigation}>
                     <item.icon />
                     <span>{item.label}</span>
                   </a>
@@ -83,13 +92,12 @@
           {#each automationItems as item (item.href)}
             <Sidebar.MenuItem
               ><Sidebar.MenuButton
-                isActive={path === item.href ||
-                  path.startsWith(`${item.href}/`)}
+                isActive={isActive(item.href)}
                 tooltipContent={item.label}
                 >{#snippet child({ props })}<a
                     href={item.href}
                     use:link
-                    {...props}><item.icon /><span>{item.label}</span></a
+                    {...props} aria-current={isActive(item.href) ? "page" : undefined} onclick={closeMobileNavigation}><item.icon /><span>{item.label}</span></a
                   >{/snippet}</Sidebar.MenuButton
               ></Sidebar.MenuItem
             >
@@ -109,15 +117,16 @@
               >{#snippet child({ props })}<a
                   href="/settings"
                   use:link
-                  {...props}><SlidersHorizontalIcon /><span>Settings</span></a
+                  {...props} aria-current={path === "/settings" ? "page" : undefined} onclick={closeMobileNavigation}><SlidersHorizontalIcon /><span>Settings</span></a
                 >{/snippet}</Sidebar.MenuButton
             ></Sidebar.MenuItem
           ></Sidebar.Menu
         ></Sidebar.GroupContent
       >
     </Sidebar.Group>
+    </nav>
   </Sidebar.Content>
-  <Sidebar.Footer class="border-sidebar-border border-t px-3 py-2">
+  <Sidebar.Footer class="border-sidebar-border border-t px-2 py-2">
     <ThemeToggle />
   </Sidebar.Footer>
   <Sidebar.Rail />

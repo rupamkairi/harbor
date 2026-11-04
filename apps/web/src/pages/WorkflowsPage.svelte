@@ -39,14 +39,14 @@
 			{#snippet header()}<TableHead>Name</TableHead><TableHead>Description</TableHead><TableHead>Version</TableHead><TableHead>Updated</TableHead><TableHead class="text-right">Actions</TableHead>{/snippet}
 			{#snippet row(workflow)}
 				<TableRow class="cursor-pointer" onclick={() => navigate(`/workflows/${workflow.id}/edit`)}>
-					<TableCell class="font-medium">{workflow.name}</TableCell>
-					<TableCell class="text-muted-foreground max-w-md truncate">{workflow.description || "—"}</TableCell>
+					<TableCell class="font-medium"><a class="rounded-sm underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-ring" href={`/workflows/${workflow.id}/edit`} onclick={(event) => event.stopPropagation()}>{workflow.name}</a></TableCell>
+					<TableCell class="text-muted-foreground max-w-md whitespace-normal break-words">{workflow.description || "—"}</TableCell>
 					<TableCell>v{workflow.version}</TableCell>
 					<TableCell>{new Date(workflow.updatedAt).toLocaleString()}</TableCell>
 					<TableCell class="text-right" onclick={(event) => event.stopPropagation()}>
 						<div class="flex justify-end gap-1">
 							<Button variant="ghost" size="sm" onclick={() => openRun(workflow.id)}><PlayIcon class="size-4" />Run</Button>
-							<DropdownMenu><DropdownMenuTrigger>{#snippet child({ props })}<Button {...props} variant="ghost" size="icon" aria-label="Workflow actions"><EllipsisIcon class="size-4" /></Button>{/snippet}</DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onclick={() => navigate(`/workflows/${workflow.id}/edit`)}>Edit</DropdownMenuItem><DropdownMenuItem variant="destructive" onclick={() => remove(workflow)}>Delete</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
+							<DropdownMenu><DropdownMenuTrigger>{#snippet child({ props })}<Button {...props} variant="ghost" size="icon" aria-label={`Actions for ${workflow.name}`}><EllipsisIcon class="size-4" /></Button>{/snippet}</DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onclick={() => navigate(`/workflows/${workflow.id}/edit`)}>Edit</DropdownMenuItem><DropdownMenuItem variant="destructive" onclick={() => remove(workflow)}>Delete</DropdownMenuItem></DropdownMenuContent></DropdownMenu>
 						</div>
 					</TableCell>
 				</TableRow>

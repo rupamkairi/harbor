@@ -41,7 +41,7 @@
 	async function scrollToEnd() {
 		if (!follow) return;
 		await tick();
-		logsEl?.scrollTo({ top: logsEl.scrollHeight, behavior: "smooth" });
+		logsEl?.scrollTo({ top: logsEl.scrollHeight, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
 	}
 
 	// Reset per-job state whenever the job id changes.
@@ -149,8 +149,10 @@
 			<Card>
 				<CardHeader class="flex-row items-center justify-between"><div><CardTitle class="text-sm">Live logs</CardTitle><p class="text-muted-foreground mt-1 text-xs">Replay and live output from all steps.</p></div><Badge variant="outline">{streamConnected ? "Live" : "Reconnecting"}</Badge></CardHeader>
 				<CardContent class="relative p-0">
-					<div bind:this={logsEl} onscroll={handleScroll} class="h-[28rem] overflow-auto bg-zinc-950 p-4 font-mono text-xs leading-5 text-zinc-100" aria-live="polite">
-						{#if !stdout && !stderr}<span class="text-zinc-500">Waiting for output…</span>{/if}
+					<!-- The scrollable log region must be focusable for keyboard scrolling. -->
+					<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+					<div bind:this={logsEl} onscroll={handleScroll} tabindex="0" role="region" aria-label="Live job output" class="h-[min(28rem,60dvh)] overflow-auto bg-zinc-950 p-4 font-mono text-xs leading-5 text-zinc-100" aria-live="polite">
+						{#if !stdout && !stderr}<span class="text-zinc-400">Waiting for output…</span>{/if}
 						{#if stdout}<pre class="whitespace-pre-wrap break-words">{stdout}</pre>{/if}
 						{#if stderr}<pre class="mt-2 whitespace-pre-wrap break-words text-red-300">{stderr}</pre>{/if}
 					</div>

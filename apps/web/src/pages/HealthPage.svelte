@@ -111,7 +111,7 @@
 
 			<div class="flex flex-wrap items-center gap-2">
 				<Select type="single" bind:value={severityFilter}>
-					<SelectTrigger class="w-44">
+					<SelectTrigger class="w-full sm:w-44" aria-label="Filter health issues by severity">
 						{severityLabel(severityFilter)}
 					</SelectTrigger>
 					<SelectContent>
@@ -122,7 +122,7 @@
 				</Select>
 
 				<Select type="single" bind:value={sourceFilter}>
-					<SelectTrigger class="w-52">
+					<SelectTrigger class="w-full sm:w-52" aria-label="Filter health issues by source">
 						{sourceFilterLabel(sourceFilter)}
 					</SelectTrigger>
 					<SelectContent>
@@ -154,7 +154,7 @@
 						</TableCell>
 						<TableCell>{sourceLabel(issue.source)}</TableCell>
 						<TableCell>{issue.agentId ?? "—"}</TableCell>
-						<TableCell class="max-w-md">{issue.message}</TableCell>
+						<TableCell class="min-w-56 max-w-md whitespace-normal break-words">{issue.message}</TableCell>
 						<TableCell>
 							<Tooltip>
 								<TooltipTrigger class="text-sm">

@@ -5,9 +5,16 @@ import { startGateway } from "./gateway";
 
 const resources = join(PATHS.RESOURCES_FOLDER, "app");
 const backend = await connectBackend(join(resources, process.platform === "win32" ? "harbor-cli.exe" : "harbor-cli"));
+const devUrl = process.env.HARBOR_DESKTOP_DEV_URL;
+if (devUrl && !/^http:\/\/(localhost|127\.0\.0\.1):\d+\/$/.test(devUrl)) {
+  await backend.stop();
+  throw new Error("HARBOR_DESKTOP_DEV_URL must be a loopback HTTP origin");
+}
 let gateway;
 try {
-  gateway = startGateway(join(resources, "web-dist"), backend.url);
+  gateway = devUrl
+    ? { url: devUrl, stop() {} }
+    : startGateway(join(resources, "web-dist"), backend.url);
 } catch (error) {
   await backend.stop();
   throw error;

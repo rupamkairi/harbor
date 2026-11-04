@@ -50,7 +50,7 @@
 		}
 	}
 
-	function requestDelete(event: MouseEvent, session: TerminalSession) {
+	function requestDelete(event: MouseEvent | KeyboardEvent, session: TerminalSession) {
 		event.preventDefault();
 		event.stopPropagation();
 		sessionToDelete = session;
@@ -108,25 +108,18 @@
 			onValueChange={(value) => (selectedSessionId = value || null)}
 			class="flex min-h-0 flex-1 flex-col gap-3"
 		>
-			<TabsList>
+			<div class="flex min-w-0 items-center gap-2">
+			<TabsList class="min-w-0 max-w-full justify-start overflow-x-auto">
 				{#each sessionsQuery.data as session (session.id)}
-					<TabsTrigger value={session.id}>
+					<TabsTrigger value={session.id} class="shrink-0 flex-none">
 						<span>{tabLabel(session)}</span>
-						<span
-							role="button"
-							tabindex="0"
-							aria-label={`Close session ${tabLabel(session)}`}
-							class="hover:bg-background/60 -mr-1 ml-1 inline-flex size-4 items-center justify-center rounded-sm"
-							onclick={(event) => requestDelete(event, session)}
-							onkeydown={(event) => {
-								if (event.key === "Enter" || event.key === " ") requestDelete(event as unknown as MouseEvent, session);
-							}}
-						>
-							<XIcon class="size-3" />
-						</span>
 					</TabsTrigger>
 				{/each}
 			</TabsList>
+			{#each sessionsQuery.data.filter((session) => session.id === selectedSessionId) as session (session.id)}
+				<Button variant="ghost" size="icon" class="shrink-0" aria-label={`Close session ${tabLabel(session)}`} onclick={(event) => requestDelete(event, session)}><XIcon class="size-4" /></Button>
+			{/each}
+			</div>
 			{#each sessionsQuery.data as session (session.id)}
 				<TabsContent value={session.id} class="flex min-h-0 flex-1 flex-col">
 					{#if selectedSessionId === session.id}

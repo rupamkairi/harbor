@@ -15,7 +15,7 @@
     "typecheck": "bun x tsc --noEmit -p packages/shared/tsconfig.json && bun x tsc --noEmit -p packages/server/tsconfig.json && bun x tsc --noEmit -p packages/cli/tsconfig.json && bun x tsc --noEmit -p packages/mcp/tsconfig.json && bun run --cwd apps/web check && bun x tsc --noEmit -p apps/desktop/tsconfig.json && bun x tsc --noEmit -p scripts/tsconfig.json",
     "package:cli": "bun scripts/package-cli.ts",
     "test": "bun test",
-    "dev:desktop": "bun run package:cli && bun run --cwd apps/desktop dev",
+    "dev:desktop": "bun run dev",
     "package:desktop": "bun scripts/package-desktop.ts",
     "clean": "bun scripts/clean.ts"
   },

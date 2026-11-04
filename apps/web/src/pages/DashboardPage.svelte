@@ -96,22 +96,28 @@
 			<Card>
 				<CardHeader><CardTitle class="text-sm font-medium">Running now</CardTitle></CardHeader>
 				<CardContent class="flex flex-col gap-1 p-0">
-					{#if runningJobs.length === 0}<p class="text-muted-foreground px-4 pb-4 text-sm">No workflows are running.</p>{/if}
-					{#each runningJobs as job (job.id)}<button class="hover:bg-muted/50 flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left" onclick={() => navigate(`/jobs/${job.id}`)}><div class="min-w-0"><p class="truncate text-sm font-medium">{workflowName(job.workflowId)}</p><p class="text-muted-foreground text-xs">{formatDuration(job)}</p></div><JobStateBadge state={job.state} /></button>{/each}
+					{#if jobsQuery.loading && !jobsQuery.data}<div class="px-4 pb-4"><Skeleton class="h-10 w-full" /></div>
+					{:else if jobsQuery.error}<div class="px-4 pb-4"><ErrorState message={jobsQuery.error} onRetry={jobsQuery.refresh} /></div>
+					{:else if runningJobs.length === 0}<p class="text-muted-foreground px-4 pb-4 text-sm">No workflows are running.</p>{/if}
+					{#each runningJobs as job (job.id)}<button class="hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left" onclick={() => navigate(`/jobs/${job.id}`)}><div class="min-w-0"><p class="truncate text-sm font-medium">{workflowName(job.workflowId)}</p><p class="text-muted-foreground text-xs">{formatDuration(job)}</p></div><JobStateBadge state={job.state} /></button>{/each}
 				</CardContent>
 			</Card>
 			<Card>
 				<CardHeader><CardTitle class="text-sm font-medium">Next schedules</CardTitle></CardHeader>
 				<CardContent class="flex flex-col gap-1 p-0">
-					{#if nextSchedules.length === 0}<p class="text-muted-foreground px-4 pb-4 text-sm">No upcoming scheduled runs.</p>{/if}
-					{#each nextSchedules as schedule (schedule.id)}<button class="hover:bg-muted/50 flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left" onclick={() => navigate("/schedules")}><p class="truncate text-sm font-medium">{workflowName(schedule.workflowId)}</p><span class="text-muted-foreground shrink-0 text-xs">{formatDateTime(schedule.nextRunAt)}</span></button>{/each}
+					{#if schedulesQuery.loading && !schedulesQuery.data}<div class="px-4 pb-4"><Skeleton class="h-10 w-full" /></div>
+					{:else if schedulesQuery.error}<div class="px-4 pb-4"><ErrorState message={schedulesQuery.error} onRetry={schedulesQuery.refresh} /></div>
+					{:else if nextSchedules.length === 0}<p class="text-muted-foreground px-4 pb-4 text-sm">No upcoming scheduled runs.</p>{/if}
+					{#each nextSchedules as schedule (schedule.id)}<button class="hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left" onclick={() => navigate("/schedules")}><p class="truncate text-sm font-medium">{workflowName(schedule.workflowId)}</p><span class="text-muted-foreground max-w-[55%] text-right text-xs">{formatDateTime(schedule.nextRunAt)}</span></button>{/each}
 				</CardContent>
 			</Card>
 			<Card>
 				<CardHeader><CardTitle class="text-sm font-medium">Recent failures</CardTitle></CardHeader>
 				<CardContent class="flex flex-col gap-1 p-0">
-					{#if recentFailures.length === 0}<p class="text-muted-foreground px-4 pb-4 text-sm">No recent workflow failures.</p>{/if}
-					{#each recentFailures as job (job.id)}<button class="hover:bg-muted/50 flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left" onclick={() => navigate(`/jobs/${job.id}`)}><p class="truncate text-sm font-medium">{workflowName(job.workflowId)}</p><span class="text-muted-foreground shrink-0 text-xs">{formatDateTime(job.endedAt)}</span></button>{/each}
+					{#if jobsQuery.loading && !jobsQuery.data}<div class="px-4 pb-4"><Skeleton class="h-10 w-full" /></div>
+					{:else if jobsQuery.error}<div class="px-4 pb-4"><ErrorState message={jobsQuery.error} onRetry={jobsQuery.refresh} /></div>
+					{:else if recentFailures.length === 0}<p class="text-muted-foreground px-4 pb-4 text-sm">No recent workflow failures.</p>{/if}
+					{#each recentFailures as job (job.id)}<button class="hover:bg-muted/50 focus-visible:outline-2 focus-visible:outline-ring focus-visible:-outline-offset-2 flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left" onclick={() => navigate(`/jobs/${job.id}`)}><p class="truncate text-sm font-medium">{workflowName(job.workflowId)}</p><span class="text-muted-foreground max-w-[55%] text-right text-xs">{formatDateTime(job.endedAt)}</span></button>{/each}
 				</CardContent>
 			</Card>
 		</div>
@@ -140,7 +146,7 @@
 	<section class="flex flex-col gap-3">
 		<h2 class="section-heading">Agents</h2>
 		{#if agentsQuery.loading}
-			<div class="grid grid-cols-2 gap-4 md:grid-cols-3">
+			<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
 				{#each Array(3) as _, i (i)}
 					<Skeleton class="h-24 w-full" />
 				{/each}
@@ -150,7 +156,7 @@
 		{:else if !agentsQuery.data || agentsQuery.data.length === 0}
 			<EmptyState title="No agents detected" description="Run detection to see agent status here." />
 		{:else}
-			<div class="grid grid-cols-2 gap-4 md:grid-cols-3">
+			<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
 				<StatCard label="Installed" value={agentSummary.installed} />
 				<StatCard label="Missing" value={agentSummary.missing} />
 				<StatCard label="Total agents" value={agentSummary.total} />

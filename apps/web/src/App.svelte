@@ -32,31 +32,37 @@
 	});
 </script>
 
+<svelte:head>
+	<title>{activeRoute.title} · Harbor</title>
+</svelte:head>
+
 <ModeWatcher />
 <Toaster richColors position="top-right" />
 <CommandPalette bind:open={commandOpen} />
 
+<a class="skip-link" href="#page-content">Skip to content</a>
+
 <Sidebar.Provider>
 	<AppSidebar />
-	<Sidebar.Inset>
-		<header class="sticky top-0 z-10 grid h-14 shrink-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b bg-background px-4 sm:grid-cols-[1fr_minmax(20rem,42rem)_1fr]">
-			<Sidebar.Trigger />
+	<Sidebar.Inset class="min-w-0">
+		<header class="sticky top-0 z-10 grid h-14 shrink-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-3 border-b bg-background px-4 md:grid-cols-[1fr_minmax(16rem,42rem)_1fr]">
+			<Sidebar.Trigger class="size-11 sm:size-8" />
 			<Button
 				variant="outline"
 				size="sm"
-				class="text-muted-foreground w-full justify-between gap-2 sm:col-start-2"
+				class="text-muted-foreground h-11 w-full justify-between gap-2 sm:h-8 md:col-start-2"
 				aria-label="Open command palette"
 				onclick={() => (commandOpen = true)}
 			>
 				<span class="flex items-center gap-2">
 					<SearchIcon class="size-4" />
-					<span class="hidden sm:inline">Search</span>
+					<span>Search pages and workflows</span>
 				</span>
 				<kbd class="bg-muted hidden rounded px-1.5 py-0.5 text-xs sm:inline">⌘K</kbd>
 			</Button>
 		</header>
 		<div class="min-h-[calc(100vh-3.5rem)] min-w-0 flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
-			<div class="mx-auto w-full max-w-[1600px]">
+			<div id="page-content" tabindex="-1" class="mx-auto w-full max-w-[1600px] outline-none">
 				{#if PageComponent}
 					{@const Comp = PageComponent}
 					<Comp {params} />

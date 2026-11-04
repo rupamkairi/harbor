@@ -17,9 +17,12 @@ bun install --frozen-lockfile
 bun run dev
 ```
 
-The API listens on `http://localhost:11123`; Vite runs at
-`http://localhost:11124` and proxies API and WebSocket requests. The development
-supervisor stops both processes when either exits or receives a termination signal.
+`bun run dev` builds the desktop prerequisites, then starts the watched API, Vite,
+and the native desktop app. The API listens on `http://127.0.0.1:11123`; Vite runs at
+`http://127.0.0.1:11124` and proxies API and WebSocket requests. The desktop window
+loads Vite, so web changes update live. The supervisor waits for both servers before
+launching desktop and stops the group when a process exits or receives a termination
+signal. `dev:desktop` is an alias; `dev:server` and `dev:web` run individually.
 
 ```sh
 bun run typecheck

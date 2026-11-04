@@ -16,7 +16,7 @@
 	<TriangleAlertIcon class="size-4" />
 	<AlertTitle>Failed to load</AlertTitle>
 	<AlertDescription class="flex flex-col items-start gap-2">
-		<p>{message}</p>
+		<p class="min-w-0 break-words [overflow-wrap:anywhere]">{message}</p>
 		{#if onRetry}
 			<Button size="sm" variant="outline" onclick={onRetry}>Retry</Button>
 		{/if}

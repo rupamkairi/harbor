@@ -141,7 +141,7 @@
 		{/snippet}
 	</PageHeader>
 
-	<div class="flex items-center gap-3">
+	<div class="flex flex-wrap items-center gap-3">
 		<Select.Root
 			type="single"
 			value={statusFilter ?? ""}
@@ -149,7 +149,7 @@
 				statusFilter = (value || undefined) as SkillStatus | undefined;
 			}}
 		>
-			<Select.Trigger class="w-48">
+			<Select.Trigger class="w-48" aria-label="Filter skills by validation status">
 				{statusFilter
 					? (STATUS_OPTIONS.find((o) => o.value === statusFilter)?.label ?? "All statuses")
 					: "All statuses"}
@@ -173,8 +173,8 @@
 			items={filteredSkills}
 			loading={skillsQuery.loading}
 				columns={7}
-				emptyTitle="No skills found"
-				emptyDescription={emptyDescription}
+				emptyTitle={statusFilter ? "No matching skills" : "No skills found"}
+				emptyDescription={statusFilter ? "Try another status to see more skills." : emptyDescription}
 			>
 				{#snippet emptyAction()}
 					<Button variant="outline" size="sm" onclick={handleRescan} disabled={rescanning}>
@@ -197,6 +197,7 @@
 						tabindex={0}
 						onclick={() => openSkill(skill)}
 						onkeydown={(event) => {
+							if (event.target !== event.currentTarget) return;
 							if (event.key === "Enter" || event.key === " ") {
 								event.preventDefault();
 								openSkill(skill);

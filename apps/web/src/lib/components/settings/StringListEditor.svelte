@@ -31,11 +31,13 @@
 	{#each value as item, index (index)}
 		<div class="flex items-center gap-2">
 			<Input
+				aria-label={`${addLabel.replace(/^Add\s+/i, "")} ${index + 1}`}
+				class="min-w-0"
 				{placeholder}
 				value={item}
 				oninput={(event: Event) => updateAt(index, (event.currentTarget as HTMLInputElement).value)}
 			/>
-			<Button variant="ghost" size="icon-sm" onclick={() => removeAt(index)}>
+			<Button variant="ghost" size="icon-sm" class="shrink-0" aria-label={`Remove item ${index + 1}`} onclick={() => removeAt(index)}>
 				<XIcon class="size-4" />
 				<span class="sr-only">Remove</span>
 			</Button>

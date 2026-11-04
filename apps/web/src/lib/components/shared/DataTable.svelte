@@ -33,7 +33,7 @@
 	} = $props();
 </script>
 
-<div class="overflow-hidden rounded-lg border bg-card">
+<div class="data-table min-w-0 overflow-hidden rounded-lg border bg-card" aria-busy={loading}>
 	<Table class="min-w-[720px]">
 		<TableHeader>
 			<TableRow>
@@ -64,3 +64,34 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.data-table :global([data-slot="table-container"]) {
+		overscroll-behavior-x: contain;
+	}
+
+	.data-table :global(tr[role="button"]:focus-visible) {
+		outline: 2px solid var(--ring);
+		outline-offset: -2px;
+		background: var(--muted);
+	}
+
+	@media (max-width: 639px) {
+		.data-table :global(th:first-child),
+		.data-table :global(td:first-child) {
+			position: sticky;
+			left: 0;
+			z-index: 1;
+			min-width: 10rem;
+			max-width: 11rem;
+			white-space: normal;
+			overflow-wrap: anywhere;
+			background: var(--card);
+			border-right: 1px solid var(--border);
+		}
+
+		.data-table :global(td) {
+			height: 3rem;
+		}
+	}
+</style>

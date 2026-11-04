@@ -14,7 +14,7 @@
 	} = $props();
 </script>
 
-<div class="flex min-h-44 flex-col items-center justify-center gap-2 rounded-lg border border-dashed bg-muted/20 px-6 py-12 text-center">
+<div class="flex min-h-36 flex-col items-center justify-center gap-2 px-4 py-8 text-center">
 	{#if icon}
 		<div class="text-muted-foreground mb-1">
 			{@render icon()}
@@ -22,7 +22,7 @@
 	{/if}
 	<p class="text-sm font-semibold">{title}</p>
 	{#if description}
-		<p class="text-muted-foreground max-w-sm text-sm">{description}</p>
+		<p class="text-muted-foreground max-w-sm text-sm leading-relaxed">{description}</p>
 	{/if}
 	{#if action}
 		<div class="mt-2">

@@ -84,13 +84,13 @@
 					{#each workflow.inputs as input (input.key)}
 						<div class="flex flex-col gap-2">
 							<Label for={`run-${input.key}`}>{input.label}{input.required ? " *" : ""}</Label>
-							<Input id={`run-${input.key}`} value={inputs[input.key] ?? ""} oninput={(event) => { inputs = { ...inputs, [input.key]: event.currentTarget.value }; check = null; }} />
+							<Input required={input.required} id={`run-${input.key}`} value={inputs[input.key] ?? ""} oninput={(event) => { inputs = { ...inputs, [input.key]: event.currentTarget.value }; check = null; }} />
 						</div>
 					{/each}
 				</div>
 			{/if}
 
-			<div class="flex items-center justify-between gap-3">
+			<div class="flex flex-wrap items-center justify-between gap-3">
 				<div><h3 class="text-sm font-medium">Dependency check</h3><p class="text-muted-foreground text-xs">Agents and resources are checked against Harbor’s index.</p></div>
 				<Button variant="outline" size="sm" onclick={refreshCheck} disabled={loading}>{loading ? "Checking…" : check ? "Check again" : "Check dependencies"}</Button>
 			</div>

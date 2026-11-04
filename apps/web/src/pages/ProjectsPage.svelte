@@ -107,7 +107,7 @@
 				{#snippet row(project)}
 					<TableRow>
 						<TableCell class="font-medium">{project.name}</TableCell>
-						<TableCell class="text-muted-foreground font-mono text-xs">{project.rootPath}</TableCell>
+						<TableCell class="text-muted-foreground max-w-sm whitespace-normal font-mono text-xs [overflow-wrap:anywhere]">{project.rootPath}</TableCell>
 						<TableCell>
 							<Tooltip>
 								<TooltipTrigger>
@@ -129,7 +129,7 @@
 							<DropdownMenu>
 								<DropdownMenuTrigger>
 									{#snippet child({ props })}
-										<Button {...props} variant="ghost" size="icon" aria-label="Project actions">
+										<Button {...props} variant="ghost" size="icon" aria-label={`Actions for ${project.name}`}>
 											<EllipsisIcon class="size-4" />
 										</Button>
 									{/snippet}

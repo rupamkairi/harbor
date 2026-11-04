@@ -25,7 +25,7 @@ schedules, and a web terminal. Bun monorepo; Svelte 5 SPA frontend.
 
 ## Commands
 
-- `bun run dev` — API server (watch, API-only) + web UI together; `dev:server` / `dev:web` individually
+- `bun run dev` — API server (watch, API-only) + Vite web UI + native desktop app together; `dev:server` / `dev:web` individually
 - `bun run harbor serve` — canonical server entry: API only; add `--serve-ui` to also serve the built web UI, `--open` to launch the browser
 - `bun run harbor <service|mcp>` — OS service mgmt, MCP server
 - `bun run typecheck` — tsc on all packages + `apps/web check`

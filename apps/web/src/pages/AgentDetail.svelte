@@ -100,7 +100,7 @@
 					{:else}
 						<div class="flex flex-col gap-1">
 							{#each paths as path (path)}
-								<div class="font-mono text-xs">{path}</div>
+								<div class="min-w-0 font-mono text-xs [overflow-wrap:anywhere]">{path}</div>
 							{/each}
 						</div>
 					{/if}
@@ -121,20 +121,20 @@
 								<CardTitle>Detection</CardTitle>
 							</CardHeader>
 							<CardContent class="grid gap-3 text-sm">
-								<div class="flex items-center justify-between gap-4">
+								<div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4 [&>span:last-child]:min-w-0 [&>span:last-child]:[overflow-wrap:anywhere] sm:[&>span:last-child]:text-right">
 									<span class="text-muted-foreground">Binary path</span>
-									<span class="font-mono text-xs">{agent.detection?.binaryPath ?? "—"}</span>
+									<span class="min-w-0 font-mono text-xs [overflow-wrap:anywhere]">{agent.detection?.binaryPath ?? "—"}</span>
 								</div>
-								<div class="flex items-center justify-between gap-4">
+								<div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4 [&>span:last-child]:min-w-0 [&>span:last-child]:[overflow-wrap:anywhere] sm:[&>span:last-child]:text-right">
 									<span class="text-muted-foreground">Version</span>
 									<span>{agent.detection?.version ?? "—"}</span>
 								</div>
-								<div class="flex items-center justify-between gap-4">
+								<div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4 [&>span:last-child]:min-w-0 [&>span:last-child]:[overflow-wrap:anywhere] sm:[&>span:last-child]:text-right">
 									<span class="text-muted-foreground">Detected at</span>
 									<span>{agent.detection?.detectedAt ?? "—"}</span>
 								</div>
 								{#if agent.detection?.error}
-									<div class="flex items-center justify-between gap-4">
+									<div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4 [&>span:last-child]:min-w-0 [&>span:last-child]:[overflow-wrap:anywhere] sm:[&>span:last-child]:text-right">
 										<span class="text-muted-foreground">Error</span>
 										<span class="text-destructive">{agent.detection.error}</span>
 									</div>

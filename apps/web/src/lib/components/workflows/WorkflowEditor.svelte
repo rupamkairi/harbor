@@ -161,9 +161,9 @@
 				<Input id="workflow-version" type="number" min="1" step="1" bind:value={version} />
 			</div>
 			<div class="flex flex-col gap-2">
-				<Label>Failure policy</Label>
+				<Label for="failure-policy">Failure policy</Label>
 				<Select.Root type="single" value={failurePolicy} onValueChange={(value) => (failurePolicy = value as WorkflowDefinition["failurePolicy"])}>
-					<Select.Trigger class="w-full">{failurePolicy === "stopOnFirstFailure" ? "Stop on first failure" : "Run independent branches"}</Select.Trigger>
+					<Select.Trigger id="failure-policy" class="w-full">{failurePolicy === "stopOnFirstFailure" ? "Stop on first failure" : "Run independent branches"}</Select.Trigger>
 					<Select.Content>
 						<Select.Item value="stopOnFirstFailure">Stop on first failure</Select.Item>
 						<Select.Item value="runIndependentBranches">Run independent branches</Select.Item>
@@ -174,17 +174,17 @@
 	</Card>
 
 	<Card>
-		<CardHeader class="flex-row items-start justify-between">
+		<CardHeader class="flex-col items-start justify-between gap-3 sm:flex-row">
 			<div><CardTitle>Inputs</CardTitle><CardDescription>Values requested whenever this workflow runs.</CardDescription></div>
 			<Button variant="outline" size="sm" onclick={addInput}><PlusIcon class="size-4" />Add input</Button>
 		</CardHeader>
 		<CardContent class="flex flex-col gap-3">
 			{#if inputs.length === 0}<p class="text-muted-foreground text-sm">This workflow does not require runtime inputs.</p>{/if}
 			{#each inputs as input, index (index)}
-				<div class="grid items-end gap-3 rounded-lg border p-3 sm:grid-cols-[1fr_1fr_1fr_auto_auto]">
-					<div class="flex flex-col gap-1.5"><Label>Key</Label><Input value={input.key} oninput={(event) => updateInput(index, { key: event.currentTarget.value })} /></div>
-					<div class="flex flex-col gap-1.5"><Label>Label</Label><Input value={input.label} oninput={(event) => updateInput(index, { label: event.currentTarget.value })} /></div>
-					<div class="flex flex-col gap-1.5"><Label>Default</Label><Input value={typeof input.default === "string" ? input.default : ""} oninput={(event) => updateInput(index, { default: event.currentTarget.value || undefined })} /></div>
+				<div class="grid items-end gap-3 rounded-lg border p-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto_auto]">
+					<div class="flex flex-col gap-1.5"><Label for={`workflow-input-key-${index}`}>Key</Label><Input id={`workflow-input-key-${index}`} value={input.key} oninput={(event) => updateInput(index, { key: event.currentTarget.value })} /></div>
+					<div class="flex flex-col gap-1.5"><Label for={`workflow-input-label-${index}`}>Label</Label><Input id={`workflow-input-label-${index}`} value={input.label} oninput={(event) => updateInput(index, { label: event.currentTarget.value })} /></div>
+					<div class="flex flex-col gap-1.5"><Label for={`workflow-input-default-${index}`}>Default</Label><Input id={`workflow-input-default-${index}`} value={typeof input.default === "string" ? input.default : ""} oninput={(event) => updateInput(index, { default: event.currentTarget.value || undefined })} /></div>
 					<label class="flex h-8 items-center gap-2 text-sm"><Checkbox checked={input.required} onCheckedChange={(checked) => updateInput(index, { required: checked === true })} />Required</label>
 					<Button variant="ghost" size="icon" aria-label="Remove input" onclick={() => (inputs = inputs.filter((_, i) => i !== index))}><Trash2Icon class="size-4" /></Button>
 				</div>
@@ -211,38 +211,38 @@
 	</Card>
 
 	<section class="flex flex-col gap-3">
-		<div class="flex items-end justify-between gap-3">
+		<div class="flex flex-wrap items-end justify-between gap-3">
 			<div><h2 class="section-heading">Steps</h2><p class="text-muted-foreground mt-1 text-sm">Ready steps run in parallel after their dependencies complete.</p></div>
 			<Button variant="outline" size="sm" onclick={addStep}><PlusIcon class="size-4" />Add step</Button>
 		</div>
 		{#each steps as step, index (step.id + index)}
 			<Card>
-				<CardHeader class="flex-row items-start justify-between">
+				<CardHeader class="flex-col items-start justify-between gap-3 sm:flex-row">
 					<div><CardTitle>Step {index + 1}</CardTitle><CardDescription class="font-mono">{step.id}</CardDescription></div>
 					<Button variant="ghost" size="icon" aria-label="Remove step" disabled={steps.length === 1} onclick={() => removeStep(index)}><Trash2Icon class="size-4" /></Button>
 				</CardHeader>
 				<CardContent class="grid gap-5 sm:grid-cols-2">
-					<div class="flex flex-col gap-2"><Label>Step ID</Label><Input value={step.id} oninput={(event) => updateStep(index, { id: slugify(event.currentTarget.value) })} /></div>
-					<div class="flex flex-col gap-2"><Label>Name</Label><Input value={step.name} oninput={(event) => updateStep(index, { name: event.currentTarget.value })} /></div>
+					<div class="flex flex-col gap-2"><Label for={`workflow-step-id-${index}`}>Step ID</Label><Input id={`workflow-step-id-${index}`} value={step.id} oninput={(event) => updateStep(index, { id: slugify(event.currentTarget.value) })} /></div>
+					<div class="flex flex-col gap-2"><Label for={`workflow-step-name-${index}`}>Name</Label><Input id={`workflow-step-name-${index}`} value={step.name} oninput={(event) => updateStep(index, { name: event.currentTarget.value })} /></div>
 					<div class="flex flex-col gap-2">
-						<Label>Agent</Label>
+						<Label for={`step-agent-${index}`}>Agent</Label>
 						<Select.Root type="single" value={step.agentId} onValueChange={(value) => updateStep(index, { agentId: value as AgentId })}>
-							<Select.Trigger class="w-full">{step.agentId}</Select.Trigger>
+							<Select.Trigger id={`step-agent-${index}`} class="w-full">{step.agentId}</Select.Trigger>
 							<Select.Content>{#each AGENT_IDS as agentId (agentId)}<Select.Item value={agentId}>{agentId}</Select.Item>{/each}</Select.Content>
 						</Select.Root>
 					</div>
-					<div class="flex flex-col gap-2"><Label>Timeout (ms, optional)</Label><Input type="number" min="1" value={step.timeoutMs ?? ""} oninput={(event) => updateStep(index, { timeoutMs: event.currentTarget.value ? Number(event.currentTarget.value) : undefined })} /></div>
+					<div class="flex flex-col gap-2"><Label for={`workflow-step-timeout-${index}`}>Timeout (ms, optional)</Label><Input id={`workflow-step-timeout-${index}`} type="number" min="1" value={step.timeoutMs ?? ""} oninput={(event) => updateStep(index, { timeoutMs: event.currentTarget.value ? Number(event.currentTarget.value) : undefined })} /></div>
 					<div class="flex flex-col gap-2">
-						<Label>Output capture</Label>
+						<Label for={`step-output-${index}`}>Output capture</Label>
 						<Select.Root type="single" value={step.outputCapture} onValueChange={(value) => updateStep(index, { outputCapture: value as WorkflowStep["outputCapture"] })}>
-							<Select.Trigger class="w-full">{step.outputCapture === "lastLine" ? "Last line" : step.outputCapture === "jsonBlock" ? "JSON block" : "Full stdout"}</Select.Trigger>
+							<Select.Trigger id={`step-output-${index}`} class="w-full">{step.outputCapture === "lastLine" ? "Last line" : step.outputCapture === "jsonBlock" ? "JSON block" : "Full stdout"}</Select.Trigger>
 							<Select.Content><Select.Item value="stdout">Full stdout</Select.Item><Select.Item value="lastLine">Last line</Select.Item><Select.Item value="jsonBlock">JSON block</Select.Item></Select.Content>
 						</Select.Root>
 					</div>
-					<div class="flex flex-col gap-2 sm:col-span-2"><Label>Prompt</Label><Textarea rows={5} value={step.prompt} oninput={(event) => updateStep(index, { prompt: event.currentTarget.value })} placeholder={"Use {{inputs.key}} to reference runtime inputs."} /></div>
+					<div class="flex flex-col gap-2 sm:col-span-2"><Label for={`workflow-step-prompt-${index}`}>Prompt</Label><Textarea id={`workflow-step-prompt-${index}`} rows={5} value={step.prompt} oninput={(event) => updateStep(index, { prompt: event.currentTarget.value })} placeholder={"Use {{inputs.key}} to reference runtime inputs."} /></div>
 					<div class="flex flex-col gap-2 sm:col-span-2">
-						<Label>Input bindings</Label>
-						<Textarea rows={3} value={mappingsText(step.inputBindings)} oninput={(event) => updateStep(index, { inputBindings: parseMappings(event.currentTarget.value) })} placeholder="source = inputs.repository" />
+						<Label for={`step-bindings-${index}`}>Input bindings</Label>
+						<Textarea id={`step-bindings-${index}`} rows={3} value={mappingsText(step.inputBindings)} oninput={(event) => updateStep(index, { inputBindings: parseMappings(event.currentTarget.value) })} placeholder="source = inputs.repository" />
 						<p class="text-muted-foreground text-xs">One binding per line. Bound values are merged into this step's inputs.</p>
 					</div>
 					<div class="flex flex-col gap-2 sm:col-span-2">
@@ -254,13 +254,13 @@
 							{#if steps.length === 1}<span class="text-muted-foreground text-xs">No other steps available.</span>{/if}
 						</div>
 					</div>
-					<div class="flex flex-col gap-2"><Label>Required skills</Label><Input value={step.requiredSkills.join(", ")} oninput={(event) => updateStep(index, { requiredSkills: commaList(event.currentTarget.value) })} placeholder="review, testing" /></div>
-					<div class="flex flex-col gap-2"><Label>Required instructions</Label><Input value={step.requiredInstructions.join(", ")} oninput={(event) => updateStep(index, { requiredInstructions: commaList(event.currentTarget.value) })} /></div>
-					<div class="flex flex-col gap-2"><Label>Required configs</Label><Input value={step.requiredConfigs.join(", ")} oninput={(event) => updateStep(index, { requiredConfigs: commaList(event.currentTarget.value) })} /></div>
-					<div class="grid grid-cols-3 gap-2">
-						<div class="flex flex-col gap-2"><Label>Attempts</Label><Input type="number" min="1" max="10" value={step.retry.maxAttempts} oninput={(event) => updateStep(index, { retry: { ...step.retry, maxAttempts: Number(event.currentTarget.value) } })} /></div>
-						<div class="flex flex-col gap-2"><Label>Backoff ms</Label><Input type="number" min="0" value={step.retry.backoffMs} oninput={(event) => updateStep(index, { retry: { ...step.retry, backoffMs: Number(event.currentTarget.value) } })} /></div>
-						<div class="flex flex-col gap-2"><Label>Multiplier</Label><Input type="number" min="1" step="0.1" value={step.retry.backoffMultiplier} oninput={(event) => updateStep(index, { retry: { ...step.retry, backoffMultiplier: Number(event.currentTarget.value) } })} /></div>
+					<div class="flex flex-col gap-2"><Label for={`workflow-step-skills-${index}`}>Required skills</Label><Input id={`workflow-step-skills-${index}`} value={step.requiredSkills.join(", ")} oninput={(event) => updateStep(index, { requiredSkills: commaList(event.currentTarget.value) })} placeholder="review, testing" /></div>
+					<div class="flex flex-col gap-2"><Label for={`workflow-step-instructions-${index}`}>Required instructions</Label><Input id={`workflow-step-instructions-${index}`} value={step.requiredInstructions.join(", ")} oninput={(event) => updateStep(index, { requiredInstructions: commaList(event.currentTarget.value) })} /></div>
+					<div class="flex flex-col gap-2"><Label for={`workflow-step-configs-${index}`}>Required configs</Label><Input id={`workflow-step-configs-${index}`} value={step.requiredConfigs.join(", ")} oninput={(event) => updateStep(index, { requiredConfigs: commaList(event.currentTarget.value) })} /></div>
+					<div class="grid grid-cols-1 gap-3 min-[480px]:grid-cols-3">
+						<div class="flex flex-col gap-2"><Label for={`workflow-step-attempts-${index}`}>Attempts</Label><Input id={`workflow-step-attempts-${index}`} type="number" min="1" max="10" value={step.retry.maxAttempts} oninput={(event) => updateStep(index, { retry: { ...step.retry, maxAttempts: Number(event.currentTarget.value) } })} /></div>
+						<div class="flex flex-col gap-2"><Label for={`workflow-step-backoff-${index}`}>Backoff ms</Label><Input id={`workflow-step-backoff-${index}`} type="number" min="0" value={step.retry.backoffMs} oninput={(event) => updateStep(index, { retry: { ...step.retry, backoffMs: Number(event.currentTarget.value) } })} /></div>
+						<div class="flex flex-col gap-2"><Label for={`workflow-step-multiplier-${index}`}>Multiplier</Label><Input id={`workflow-step-multiplier-${index}`} type="number" min="1" step="0.1" value={step.retry.backoffMultiplier} oninput={(event) => updateStep(index, { retry: { ...step.retry, backoffMultiplier: Number(event.currentTarget.value) } })} /></div>
 					</div>
 					<label class="flex items-center gap-2 text-sm sm:col-span-2"><Checkbox checked={step.continueOnFailure} onCheckedChange={(checked) => updateStep(index, { continueOnFailure: checked === true })} />Allow dependent branches to continue if this step fails</label>
 				</CardContent>
@@ -271,7 +271,7 @@
 	<section class="flex flex-col gap-3"><h2 class="section-heading">Dependency graph</h2><WorkflowDagPreview {steps} /></section>
 
 	{#if error}<Alert variant="destructive"><AlertTitle>Workflow is not valid</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>{/if}
-	<div class="sticky bottom-0 flex justify-end gap-2 border-t bg-background/95 py-4 backdrop-blur-sm">
+	<div class="sticky bottom-0 flex justify-end gap-2 border-t bg-background py-4">
 		<Button variant="outline" onclick={onCancel} disabled={saving}>Cancel</Button>
 		<Button onclick={submit} disabled={saving}><SaveIcon class="size-4" />{saving ? "Saving…" : "Save workflow"}</Button>
 	</div>

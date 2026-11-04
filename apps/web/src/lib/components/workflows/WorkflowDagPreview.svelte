@@ -29,11 +29,11 @@
 				{#each level as step (step.id)}
 					<div class="rounded-md border bg-card px-3 py-2">
 						<p class="truncate text-sm font-medium">{step.name || step.id}</p>
-						<div class="mt-1 flex items-center gap-1">
-							<Badge variant="outline" class="font-mono text-[10px]">{step.id}</Badge>
-							<span class="text-muted-foreground text-[11px]">{step.agentId}</span>
+						<div class="mt-1 flex flex-wrap items-center gap-1">
+							<Badge variant="outline" class="font-mono text-xs">{step.id}</Badge>
+							<span class="text-muted-foreground text-xs">{step.agentId}</span>
 						</div>
-						<p class="text-muted-foreground mt-1 truncate text-[11px]" title={step.after.join(", ") || "Starts immediately"}>
+						<p class="text-muted-foreground mt-1 truncate text-xs" title={step.after.join(", ") || "Starts immediately"}>
 							{step.after.length ? `After: ${step.after.join(", ")}` : "Starts immediately"}
 						</p>
 					</div>

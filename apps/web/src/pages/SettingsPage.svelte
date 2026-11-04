@@ -319,6 +319,9 @@
 					<Input id="job-retention-days" bind:value={jobRetentionDaysText} type="text" inputmode="numeric" aria-invalid={validationError?.includes("Job retention")} />
 					<p class="text-muted-foreground text-xs">Allowed range: 1–3,650 days.</p>
 				</div>
+				<div class="flex justify-end sm:col-span-2">
+					<Button onclick={save} disabled={saving}><SaveIcon class="size-4" />{saving ? "Saving…" : "Save settings"}</Button>
+				</div>
 			</CardContent>
 		</Card>
 	{/if}
@@ -357,8 +360,8 @@
 				{/if}
 
 				<div class="flex items-center gap-2">
-					<Switch checked={syncEnabled} onCheckedChange={(checked) => (syncEnabled = checked)} aria-label="Enable sync" />
-					<Label>Enable sync</Label>
+					<Switch id="sync-enabled" checked={syncEnabled} onCheckedChange={(checked) => (syncEnabled = checked)} aria-label="Enable sync" />
+					<Label for="sync-enabled">Enable sync</Label>
 				</div>
 
 				<div class="flex flex-col gap-2">
@@ -401,7 +404,7 @@
 					<p class="text-destructive text-sm">{syncNowError}</p>
 				{/if}
 
-				<div class="flex justify-end gap-2">
+				<div class="flex flex-wrap justify-end gap-2">
 					<Button variant="outline" onclick={runSyncNow} disabled={syncingNow || !syncStatusQuery.data?.enabled}>
 						<RefreshCwIcon class="size-4" />
 						{syncingNow ? "Syncing…" : "Sync now"}

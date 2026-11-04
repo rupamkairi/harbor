@@ -15,11 +15,11 @@ export default defineConfig({
     port: 11124,
     proxy: {
       "/api": {
-        target: "http://localhost:11123",
+        target: `http://127.0.0.1:${process.env.HARBOR_PORT ?? 11123}`,
         changeOrigin: true,
       },
       "/ws": {
-        target: "http://localhost:11123",
+        target: `http://127.0.0.1:${process.env.HARBOR_PORT ?? 11123}`,
         changeOrigin: true,
         ws: true,
       },

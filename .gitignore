@@ -7,3 +7,6 @@ dist/
 apps/desktop/build/
 apps/desktop/artifacts/
 *.tsbuildinfo
+
+# Local UI audit captures and skill output
+.taste-skill/

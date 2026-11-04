@@ -71,10 +71,10 @@
 					<TableHead>Status</TableHead>
 					<TableHead>Version</TableHead>
 					<TableHead>Binary path</TableHead>
-					<TableHead>Skills</TableHead>
-					<TableHead>Instructions</TableHead>
-					<TableHead>Memory</TableHead>
-					<TableHead>Configs</TableHead>
+					<TableHead class="text-right">Skills</TableHead>
+					<TableHead class="text-right">Instructions</TableHead>
+					<TableHead class="text-right">Memory</TableHead>
+					<TableHead class="text-right">Configs</TableHead>
 				{/snippet}
 				{#snippet row(agent)}
 					<TableRow
@@ -83,6 +83,7 @@
 						tabindex={0}
 						onclick={() => goToAgent(agent)}
 						onkeydown={(event) => {
+							if (event.target !== event.currentTarget) return;
 							if (event.key === "Enter" || event.key === " ") {
 								event.preventDefault();
 								goToAgent(agent);
@@ -106,10 +107,10 @@
 								—
 							{/if}
 						</TableCell>
-						<TableCell>{agent.resourceCounts.skills}</TableCell>
-						<TableCell>{agent.resourceCounts.instructions}</TableCell>
-						<TableCell>{agent.resourceCounts.memory}</TableCell>
-						<TableCell>{agent.resourceCounts.configs}</TableCell>
+						<TableCell class="text-right tabular-nums">{agent.resourceCounts.skills}</TableCell>
+						<TableCell class="text-right tabular-nums">{agent.resourceCounts.instructions}</TableCell>
+						<TableCell class="text-right tabular-nums">{agent.resourceCounts.memory}</TableCell>
+						<TableCell class="text-right tabular-nums">{agent.resourceCounts.configs}</TableCell>
 					</TableRow>
 				{/snippet}
 			</DataTable>

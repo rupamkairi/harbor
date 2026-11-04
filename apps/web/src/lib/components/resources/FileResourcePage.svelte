@@ -212,7 +212,7 @@
 					<TableHead>Path</TableHead>
 					<TableHead>Scope</TableHead>
 					<TableHead>Agent</TableHead>
-					<TableHead>Size</TableHead>
+					<TableHead class="text-right">Size</TableHead>
 					<TableHead>Modified</TableHead>
 					{#if format}
 						<TableHead>Format</TableHead>
@@ -225,6 +225,7 @@
 						tabindex={0}
 						onclick={() => openRow(item)}
 						onkeydown={(event) => {
+							if (event.target !== event.currentTarget) return;
 							if (event.key === "Enter" || event.key === " ") {
 								event.preventDefault();
 								openRow(item);
@@ -252,7 +253,7 @@
 						</TableCell>
 						<TableCell><ScopeBadge scope={item.scope} /></TableCell>
 						<TableCell>{item.agentId}</TableCell>
-						<TableCell class="text-muted-foreground text-xs">{formatBytes(item.sizeBytes)}</TableCell>
+						<TableCell class="text-muted-foreground text-right text-xs tabular-nums">{formatBytes(item.sizeBytes)}</TableCell>
 						<TableCell class="text-muted-foreground text-xs">
 							<Tooltip>
 								<TooltipTrigger>
@@ -275,16 +276,16 @@
 
 <Sheet open={sheetOpen} onOpenChange={handleSheetOpenChange}>
 	<SheetContent
-	class="overflow-y-auto sm:min-w-[40rem] sm:max-w-5xl"
+	class="overflow-y-auto w-full sm:w-[min(48rem,calc(100vw-2rem))] sm:max-w-none"
 >
 		{#if selected}
 			<SheetHeader>
-				<SheetTitle>{fileName(selected)}</SheetTitle>
-				<SheetDescription>{selected.path}</SheetDescription>
+				<SheetTitle class="pr-8 [overflow-wrap:anywhere]">{fileName(selected)}</SheetTitle>
+				<SheetDescription class="[overflow-wrap:anywhere]">{selected.path}</SheetDescription>
 			</SheetHeader>
 			<div class="flex flex-col gap-4 px-4 pb-4 text-sm">
 				{#if sheetMode === "view"}
-					<div class="grid grid-cols-2 gap-3">
+					<div class="grid grid-cols-1 gap-3 min-[400px]:grid-cols-2 [&>div]:min-w-0 [&_p]:[overflow-wrap:anywhere]">
 						<div>
 							<p class="text-muted-foreground text-xs">Scope</p>
 							<ScopeBadge scope={selected.scope} />

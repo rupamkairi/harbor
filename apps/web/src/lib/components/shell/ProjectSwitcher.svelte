@@ -43,6 +43,7 @@
           <Sidebar.MenuButton
             size="default"
             class="data-[state=open]:bg-sidebar-accent"
+            aria-label={`Switch project: ${label}`}
             {...props}
           >
             {#if selectedProject}
@@ -55,7 +56,7 @@
           </Sidebar.MenuButton>
         {/snippet}
       </DropdownMenu.Trigger>
-      <DropdownMenu.Content class="w-56" align="start">
+      <DropdownMenu.Content class="w-64 max-w-[calc(100vw-2rem)]" align="start">
         <DropdownMenu.Item onclick={() => setSelectedProjectId(null)}>
           <GlobeIcon class="size-4" />
           Global
@@ -65,7 +66,7 @@
           {#each projectsQuery.data as project (project.id)}
             <DropdownMenu.Item onclick={() => setSelectedProjectId(project.id)}>
               <FolderIcon class="size-4" />
-              {project.name}
+              <span class="min-w-0 truncate" title={project.name}>{project.name}</span>
             </DropdownMenu.Item>
           {/each}
         {/if}

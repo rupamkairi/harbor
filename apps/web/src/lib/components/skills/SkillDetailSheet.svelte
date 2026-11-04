@@ -44,12 +44,12 @@
 </script>
 
 <Sheet.Root bind:open>
-	<Sheet.Content class="flex w-full flex-col gap-6 overflow-y-auto sm:min-w-[40rem] sm:max-w-5xl">
+	<Sheet.Content class="flex w-full flex-col gap-6 overflow-y-auto sm:w-[min(48rem,calc(100vw-2rem))] sm:max-w-none">
 		{#if skill}
 			<Sheet.Header>
-				<Sheet.Title>{title}</Sheet.Title>
+				<Sheet.Title class="pr-8 [overflow-wrap:anywhere]">{title}</Sheet.Title>
 				{#if skill.skill.description}
-					<Sheet.Description>{skill.skill.description}</Sheet.Description>
+					<Sheet.Description class="[overflow-wrap:anywhere]">{skill.skill.description}</Sheet.Description>
 				{/if}
 			</Sheet.Header>
 
@@ -59,7 +59,7 @@
 					<span class="text-muted-foreground text-sm">{skill.agentId}</span>
 				</div>
 
-				<div class="grid grid-cols-2 gap-3 text-sm">
+				<div class="grid grid-cols-1 gap-3 text-sm min-[400px]:grid-cols-2 [&>div]:min-w-0 [&_p]:[overflow-wrap:anywhere]">
 					<div>
 						<p class="text-muted-foreground text-xs">Validation status</p>
 						<ValidationBadge status={skill.skill.status} />
@@ -81,7 +81,7 @@
 						<ScrollArea class="h-48 rounded-md border">
 							<ul class="p-3 font-mono text-xs">
 								{#each skill.skill.files as file (file)}
-									<li class="text-muted-foreground py-0.5">{file}</li>
+									<li class="text-muted-foreground py-0.5 [overflow-wrap:anywhere]">{file}</li>
 								{/each}
 							</ul>
 						</ScrollArea>
@@ -110,7 +110,7 @@
 				</div>
 			</div>
 
-			<Sheet.Footer class="flex-row justify-end gap-2">
+			<Sheet.Footer class="flex-row flex-wrap justify-end gap-2">
 				{#if hasProject}
 					<Button variant="outline" onclick={() => (syncOpen = true)}>Sync…</Button>
 				{:else}

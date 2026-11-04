@@ -13,7 +13,9 @@ bun run dev:desktop
 bun run package:desktop
 ```
 
-Development uses the built web UI; rebuild/restart to pick up UI changes.
+`bun run dev` (or `bun run dev:desktop`) starts the watched API, Vite, and desktop
+together. The desktop window loads Vite for live UI updates; native main-process
+changes require restarting the command. Packaged builds continue to use bundled UI.
 Release outputs are in `apps/desktop/artifacts/`, app bundles in
 `apps/desktop/build/`. Build on each target OS; macOS and Windows ARM64
 service/terminal capabilities remain subject to the CLI's platform support.
