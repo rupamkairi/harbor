@@ -1,3 +1,4 @@
+import { SkillSearchSchema, SkillCatalogSchema, SkillCreateSchema, SkillUpdatesSchema } from "@harbor/shared";
 import { z } from "zod";
 import {
 	AgentDetectionResultSchema,
@@ -421,5 +422,27 @@ export function deleteTerminalSession(id: string) {
 	return fetchJson(`/terminal/sessions/${encodeURIComponent(id)}`, TerminalDeleteResultSchema, {
 		method: "DELETE",
 		body: JSON.stringify({ confirm: true }),
+	});
+}
+
+export function searchSkillCatalog(q: string) {
+	return fetchJson(`/skills/search${toQueryString({ q })}`, SkillSearchSchema);
+}
+export function browseSkillRepository(repository: string) {
+	return fetchJson("/skills/catalog", SkillCatalogSchema, {
+		method: "POST",
+		body: JSON.stringify({ repository }),
+	});
+}
+export function createNewSkill(body: z.infer<typeof SkillCreateSchema>) {
+	return fetchJson("/skills/create", MultiTargetResponseSchema, {
+		method: "POST",
+		body: JSON.stringify(body),
+	});
+}
+export function checkSkillUpdates(query: ResourceScopeQuery) {
+	return fetchJson("/skills/updates", SkillUpdatesSchema, {
+		method: "POST",
+		body: JSON.stringify(query),
 	});
 }

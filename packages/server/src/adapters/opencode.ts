@@ -7,8 +7,12 @@ export const opencodeAdapter: AgentAdapter = {
   versionCommand: ["opencode", "--version"],
   globalConfigPaths: ["~/.config/opencode/opencode.json"],
   projectConfigPaths: ["opencode.json", ".opencode/opencode.json"],
-  globalSkillRoots: ["~/.config/opencode/skill", "~/.config/opencode/skills"],
-  projectSkillRoots: [".opencode/skill", ".opencode/skills"],
+  globalSkillRoots: [
+    "~/.config/opencode/skill",
+    "~/.config/opencode/skills",
+    "~/.agents/skills",
+  ],
+  projectSkillRoots: [".opencode/skill", ".opencode/skills", ".agents/skills"],
   instructionFilePatterns: {
     global: ["~/.config/opencode/AGENTS.md"],
     project: ["AGENTS.md"],

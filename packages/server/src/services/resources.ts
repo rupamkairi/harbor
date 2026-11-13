@@ -1,3 +1,4 @@
+import { skillOrigin } from "./skill-origin";
 import { open } from "node:fs/promises";
 import type {
   AgentId,
@@ -83,7 +84,16 @@ async function rowToRecord(db: Db, row: ResourceRow): Promise<ResourceRecord> {
   if (row.kind === "skill") {
     const skill = meta.skill as Skill;
     const issues = await getSkillIssues(db, row.id);
-    const resolvedSkill: Skill = { ...skill, issues };
+    const origin = await skillOrigin(
+      db,
+      { path: row.path, scope: row.scope, projectId: row.project_id },
+      skill?.name ?? null,
+    );
+    const resolvedSkill: Skill = {
+      ...skill,
+      issues,
+      group: origin?.repository ?? skill?.group ?? null,
+    };
     const record: SkillResource = {
       ...base,
       kind: "skill",
@@ -135,7 +145,7 @@ export async function listResourcesByKind(
     clauses.push("scope = ?");
     args.push(filters.scope);
   }
-  if (filters.agentId) {
+  if (filters.agentId && kind !== "skill") {
     clauses.push("agent_id = ?");
     args.push(filters.agentId);
   }
@@ -149,7 +159,11 @@ export async function listResourcesByKind(
     args,
   );
 
-  const records = await Promise.all(rows.map((row) => rowToRecord(db, row)));
+  let records = await Promise.all(rows.map((row) => rowToRecord(db, row)));
+  if (filters.agentId && kind === "skill") {
+    records = records.filter(record => record.agentId === filters.agentId ||
+      (record.kind === "skill" && record.linkedAgents.includes(filters.agentId!)));
+  }
 
   if (filters.status && kind === "skill") {
     return records.filter(

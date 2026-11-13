@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AgentMark from "$lib/components/shared/AgentMark.svelte";
 	import PageHeader from "$lib/components/shell/PageHeader.svelte";
 	import DataTable from "$lib/components/shared/DataTable.svelte";
 	import ErrorState from "$lib/components/shared/ErrorState.svelte";
@@ -90,7 +91,7 @@
 							}
 						}}
 					>
-						<TableCell class="font-medium">{agent.name}</TableCell>
+						<TableCell class="font-medium"><AgentMark agent={agent.id} label={agent.name} /></TableCell>
 						<TableCell>
 							<StatusBadge state={agent.detection?.state ?? "unknown"} />
 						</TableCell>

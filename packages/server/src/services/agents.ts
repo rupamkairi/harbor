@@ -82,6 +82,25 @@ async function getResourceCounts(
     if (key) current[key] = Number(row.count);
     counts.set(agentId, current);
   }
+  // Skills are canonicalized across symlinks; attribute each physical skill to every linked agent.
+  for (const count of counts.values()) count.skills = 0;
+  const skills = await db.all<{ agent_id: string; meta_json: string }>(
+    `SELECT agent_id, meta_json FROM resources WHERE kind = 'skill' AND ${clauses.join(" AND ")}`,
+    args,
+  );
+  for (const resource of skills) {
+    const meta = JSON.parse(resource.meta_json || "{}");
+    const agents = new Set<AgentId>(
+      [resource.agent_id, ...(meta.linkedAgents ?? [])].filter(
+        (id) => id !== "shared",
+      ) as AgentId[],
+    );
+    for (const id of agents) {
+      const current = counts.get(id) ?? emptyResourceCounts();
+      current.skills++;
+      counts.set(id, current);
+    }
+  }
   return counts;
 }
 

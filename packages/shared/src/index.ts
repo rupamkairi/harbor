@@ -21,3 +21,4 @@ export * from "./schemas/syntax-error";
 export * from "./schemas/workflow";
 export * from "./schemas/sync";
 export * from "./schemas/terminal";
+export * from "./schemas/skill-catalog";

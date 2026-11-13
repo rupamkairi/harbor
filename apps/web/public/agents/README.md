@@ -1,0 +1,1 @@
+Brand assets: Claude, OpenCode, Cursor, and Google Gemini from [Simple Icons](https://github.com/simple-icons/simple-icons) (CC0). OpenAI from [Lobe Icons](https://github.com/lobehub/lobe-icons) (MIT). Logos identify their respective products; trademarks belong to their owners.

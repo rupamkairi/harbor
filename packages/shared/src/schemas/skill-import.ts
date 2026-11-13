@@ -32,7 +32,7 @@ export const SkillLoadResultSchema = z.object({
 export type SkillLoadResult = z.infer<typeof SkillLoadResultSchema>;
 
 export const SkillImportInstallRequestSchema = z.object({
-  stagingId: z.string().min(1),
+  stagingId: z.string().uuid(),
   targets: z.array(InstallTargetSchema).min(1).max(10),
 });
 export type SkillImportInstallRequest = z.infer<typeof SkillImportInstallRequestSchema>;

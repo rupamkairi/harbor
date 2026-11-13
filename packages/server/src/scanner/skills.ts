@@ -1,4 +1,4 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir, readFile, realpath } from "node:fs/promises";
 import { join, relative } from "node:path";
 import type { Skill, SkillIssueCode, SkillStatus, SkillValidationIssue } from "@harbor/shared";
 import { extractFrontmatter } from "./frontmatter";
@@ -199,10 +199,14 @@ async function buildSkill(
 export async function scanSkillRoot(
   root: string,
   options: SkillScanOptions,
+  visited = new Set<string>(),
 ): Promise<SkillCandidate[]> {
   if (!isPathAllowed(options.scanRoot, root, options)) return [];
   const rootStat = await safeLstat(root);
   if (!rootStat) return [];
+  const physicalRoot = await realpath(root).catch(() => null);
+  if (!physicalRoot || visited.has(physicalRoot)) return [];
+  visited.add(physicalRoot);
 
   let entries;
   try {
@@ -248,12 +252,30 @@ export async function scanSkillRoot(
     const resolvedStat = await safeLstat(resolved);
     if (!resolvedStat || !resolvedStat.isDirectory()) continue;
 
+    // Containers expose their child skills. Physical-root tracking prevents symlink cycles.
+    if (!(await safeLstat(join(resolved, "SKILL.md")))) {
+      if (visited.has(await realpath(resolved))) continue;
+      const nested = await scanSkillRoot(originalPath, options, visited);
+      const validNested = nested.filter(
+        (item) =>
+          !item.skill.issues.some((issue) => issue.code === "missing-skill-md"),
+      );
+      if (validNested.length) {
+        candidates.push(
+          ...validNested.map((item) => ({
+            ...item,
+            skill: { ...item.skill, group: dirName },
+          })),
+        );
+        continue;
+      }
+    }
     const { skill, unreadable } = await buildSkill(dirName, resolved, options);
 
     candidates.push({
       dirName,
       originalPath,
-      resolvedPath: resolved,
+      resolvedPath: await realpath(resolved),
       isSymlink,
       symlinkBroken: false,
       skill: unreadable ? { ...skill, status: "unknown" } : skill,

@@ -22,9 +22,26 @@ export function listAdapters(): AgentAdapter[] {
 }
 
 export function listSkillSources(): SkillSource[] {
-  return [...adapters.values(), agentsStandardSource];
+  return [
+    ...adapters.values(),
+    {
+      id: "cursor",
+      name: "Cursor",
+      globalSkillRoots: ["~/.cursor/skills"],
+      projectSkillRoots: [".cursor/skills", ".agents/skills"],
+    },
+    {
+      id: "gemini-cli",
+      name: "Gemini CLI",
+      globalSkillRoots: ["~/.gemini/skills"],
+      projectSkillRoots: [".gemini/skills", ".agents/skills"],
+    },
+    agentsStandardSource,
+  ];
 }
 
-export function getSkillSource(sourceId: SkillSourceId): SkillSource | undefined {
+export function getSkillSource(
+  sourceId: SkillSourceId,
+): SkillSource | undefined {
   return listSkillSources().find((source) => source.id === sourceId);
 }

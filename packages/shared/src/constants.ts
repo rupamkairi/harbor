@@ -1,8 +1,18 @@
 export const AGENT_IDS = ["claude-code", "codex", "opencode"] as const;
 /** Agent-agnostic skill source (`~/.agents/skills`, `.agents/skills` — the `npx skills add` standard). */
 export const SHARED_SOURCE_ID = "shared" as const;
-export const SKILL_SOURCE_IDS = [...AGENT_IDS, SHARED_SOURCE_ID] as const;
-export const RESOURCE_KINDS = ["skill", "instruction", "memory", "config"] as const;
+export const SKILL_SOURCE_IDS = [
+  ...AGENT_IDS,
+  "cursor",
+  "gemini-cli",
+  SHARED_SOURCE_ID,
+] as const;
+export const RESOURCE_KINDS = [
+  "skill",
+  "instruction",
+  "memory",
+  "config",
+] as const;
 export const SCOPES = ["global", "project"] as const;
 
 export type AgentId = (typeof AGENT_IDS)[number];
@@ -15,6 +25,8 @@ export const SKILL_SOURCE_LABELS: Record<SkillSourceId, string> = {
   codex: "Codex",
   opencode: "opencode",
   shared: "Shared",
+  cursor: "Cursor",
+  "gemini-cli": "Gemini CLI",
 };
 
 export interface AdapterFileRules {

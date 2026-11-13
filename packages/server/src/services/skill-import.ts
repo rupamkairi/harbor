@@ -38,6 +38,8 @@ interface StagingMeta {
   expiresAt: string;
   source: SkillSource;
   skillName: string;
+  repository?: string;
+  created?: boolean;
 }
 
 export function defaultStagingRoot(): string {
@@ -426,7 +428,8 @@ export async function installStaged(
     sourceDir: skillDir,
     skillName,
     targets: input.targets,
-    source: { kind: "import", stagingId: input.stagingId },
+    source: { kind: "import", stagingId: input.stagingId, repository: meta.repository },
+    overwrite: !(meta.repository || meta.created),
   });
 
   if (response.results.every((result) => result.ok)) {

@@ -27,6 +27,7 @@ export const SkillSchema = z.object({
   name: z.string().nullable(),
   description: z.string().nullable(),
   dirName: z.string(),
+  group: z.string().nullable().optional(),
   status: SkillStatusSchema,
   issues: z.array(SkillValidationIssueSchema),
   files: z.array(z.string()),

@@ -1,4 +1,20 @@
 import {
+  SkillCatalogRequestSchema,
+  SkillCatalogSchema,
+  SkillSearchSchema,
+  SkillCreateSchema,
+  SkillUpdatesSchema,
+} from "@harbor/shared";
+import {
+  browseRepository,
+  runSkills,
+  createSkill,
+  checkSkillUpdates,
+  parseSkillSearch,
+} from "../../services/skill-catalog";
+import { defaultStagingRoot } from "../../services/skill-import";
+import { mkdir } from "node:fs/promises";
+import {
   SkillSourceIdSchema,
   MultiTargetResponseSchema,
   ScopeSchema,
@@ -17,11 +33,22 @@ import {
 } from "@harbor/shared";
 import { z } from "zod";
 import { getResource, listResourcesByKind } from "../../services/resources";
-import { deleteSkillCopy, installSkillFromResource } from "../../services/skill-write";
-import { installStaged, loadSkill, SkillImportError } from "../../services/skill-import";
+import {
+  deleteSkillCopy,
+  installSkillFromResource,
+} from "../../services/skill-write";
+import {
+  installStaged,
+  loadSkill,
+  SkillImportError,
+} from "../../services/skill-import";
 import { getSyncDiff, syncSkill } from "../../services/skill-sync";
 import { err, ok } from "../respond";
-import { validateBody, validateQuery, validateScopeSelection } from "../validate";
+import {
+  validateBody,
+  validateQuery,
+  validateScopeSelection,
+} from "../validate";
 import type { RegisterRoutes } from "./types";
 
 const skillQuerySchema = z.object({
@@ -37,8 +64,67 @@ const skillDeleteBodySchema = z.object({
 
 export const registerSkillRoutes: RegisterRoutes = (router, { db }) => {
   router.get("/api/v1/skills", async ({ query }) => {
-    const filters = validateScopeSelection(validateQuery(query, skillQuerySchema));
+    const filters = validateScopeSelection(
+      validateQuery(query, skillQuerySchema),
+    );
     return ok(await listResourcesByKind(db, "skill", filters), SkillListSchema);
+  });
+
+  router.post("/api/v1/skills/catalog", async ({ request }) => {
+    const body = await validateBody(request, SkillCatalogRequestSchema);
+    try {
+      return ok(
+        await browseRepository(db, body.repository),
+        SkillCatalogSchema,
+      );
+    } catch (error) {
+      if (error instanceof SkillImportError)
+        return err("bad_request", error.message, error.status);
+      throw error;
+    }
+  });
+  router.get("/api/v1/skills/search", async ({ query }) => {
+    const { q } = validateQuery(
+      query,
+      z.object({
+        q: z
+          .string()
+          .trim()
+          .min(2)
+          .max(200)
+          .regex(/^[^\x00-\x1f-][^\x00-\x1f]*$/),
+      }),
+    );
+    try {
+      await mkdir(defaultStagingRoot(), { recursive: true });
+      return ok(
+        parseSkillSearch(await runSkills(["find", q], defaultStagingRoot())),
+        SkillSearchSchema,
+      );
+    } catch (error) {
+      if (error instanceof SkillImportError)
+        return err("bad_request", error.message, error.status);
+      throw error;
+    }
+  });
+  router.post("/api/v1/skills/create", async ({ request }) => {
+    const body = await validateBody(request, SkillCreateSchema);
+    try {
+      const result = await createSkill(db, body);
+      if (result.status !== "ok")
+        return err(result.status, result.message, 409);
+      return ok(result.response, MultiTargetResponseSchema);
+    } catch (error) {
+      if (error instanceof SkillImportError)
+        return err("bad_request", error.message, error.status);
+      throw error;
+    }
+  });
+  router.post("/api/v1/skills/updates", async ({ request }) => {
+    const filters = validateScopeSelection(
+      await validateBody(request, skillQuerySchema),
+    );
+    return ok(await checkSkillUpdates(db, filters), SkillUpdatesSchema);
   });
 
   router.get("/api/v1/skills/:id", async ({ params }) => {
@@ -51,8 +137,13 @@ export const registerSkillRoutes: RegisterRoutes = (router, { db }) => {
 
   router.post("/api/v1/skills/install", async ({ request }) => {
     const body = await validateBody(request, SkillInstallRequestSchema);
-    const response = await installSkillFromResource(db, body.resourceId, body.targets);
-    if (!response) return err("not_found", `Skill not found: ${body.resourceId}`, 404);
+    const response = await installSkillFromResource(
+      db,
+      body.resourceId,
+      body.targets,
+    );
+    if (!response)
+      return err("not_found", `Skill not found: ${body.resourceId}`, 404);
     return ok(response, MultiTargetResponseSchema);
   });
 
@@ -93,7 +184,11 @@ export const registerSkillRoutes: RegisterRoutes = (router, { db }) => {
     const parsed = validateQuery(query, SyncDiffQuerySchema);
     const diff = await getSyncDiff(db, parsed);
     if (!diff) {
-      return err("not_found", `No copies of skill "${parsed.skillName}" found for either side`, 404);
+      return err(
+        "not_found",
+        `No copies of skill "${parsed.skillName}" found for either side`,
+        404,
+      );
     }
     return ok(diff, SyncDiffSchema);
   });

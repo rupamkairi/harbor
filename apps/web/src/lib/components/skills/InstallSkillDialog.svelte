@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AgentMark from "$lib/components/shared/AgentMark.svelte";
 	import {
 		Dialog,
 		DialogContent,
@@ -18,7 +19,15 @@
 	import { installSkill } from "$lib/api/endpoints";
 	import { ApiError } from "$lib/api/client";
 	import { getSelectedProjectId, invalidateResources } from "$lib/state/app-state.svelte";
-	import { AGENT_IDS, ADAPTER_FILE_RULES, type AgentId, type InstallTarget, type Scope, type SkillResource, type TargetResult } from "@harbor/shared";
+	import {
+		SKILL_SOURCE_IDS,
+		SKILL_SOURCE_LABELS,
+		type SkillSourceId,
+		type InstallTarget,
+		type Scope,
+		type SkillResource,
+		type TargetResult,
+	} from "@harbor/shared";
 
 	let {
 		open = $bindable(false),
@@ -30,9 +39,9 @@
 		onInstalled?: () => void;
 	} = $props();
 
-	function defaultTargets(): Record<AgentId, { enabled: boolean; scope: Scope }> {
-		const record = {} as Record<AgentId, { enabled: boolean; scope: Scope }>;
-		for (const agentId of AGENT_IDS) {
+	function defaultTargets(): Record<SkillSourceId, { enabled: boolean; scope: Scope }> {
+		const record = {} as Record<SkillSourceId, { enabled: boolean; scope: Scope }>;
+		for (const agentId of SKILL_SOURCE_IDS) {
 			record[agentId] = { enabled: false, scope: "global" };
 		}
 		return record;
@@ -45,9 +54,13 @@
 	const projectId = $derived(getSelectedProjectId());
 	const skillName = $derived(skill?.skill.name ?? skill?.skill.dirName ?? "Skill");
 
-	function isCurrentLocation(agentId: AgentId, scope: Scope): boolean {
+	function isCurrentLocation(agentId: SkillSourceId, scope: Scope): boolean {
 		if (!skill) return false;
-		if (skill.agentId !== agentId || skill.scope !== scope) return false;
+		if (
+			(skill.agentId !== agentId && !skill.linkedAgents.includes(agentId)) ||
+			skill.scope !== scope
+		)
+			return false;
 		if (scope === "project") return skill.projectId === projectId;
 		return true;
 	}
@@ -68,7 +81,7 @@
 
 	function buildInstallTargets(): InstallTarget[] {
 		const result: InstallTarget[] = [];
-		for (const agentId of AGENT_IDS) {
+		for (const agentId of SKILL_SOURCE_IDS) {
 			const row = targets[agentId];
 			if (!row.enabled) continue;
 			if (isCurrentLocation(agentId, row.scope)) continue;
@@ -121,7 +134,8 @@
 	<DialogContent class="sm:max-w-xl">
 		<DialogHeader>
 			<DialogTitle>Install "{skillName}"</DialogTitle>
-			<DialogDescription>Choose which agents and scopes to install this skill to.</DialogDescription>
+			<DialogDescription>Choose which agents and scopes to install this skill to.</DialogDescription
+			>
 		</DialogHeader>
 
 		{#if installing || installResults}
@@ -150,28 +164,19 @@
 			</div>
 		{:else}
 			<div class="flex flex-col gap-3">
-				{#each AGENT_IDS as agentId (agentId)}
-					{@const hasSkillRoots = ADAPTER_FILE_RULES[agentId].hasSkillRoots}
+				{#each SKILL_SOURCE_IDS as agentId (agentId)}
 					{@const row = targets[agentId]}
-					{@const alreadyInstalled = hasSkillRoots && isCurrentLocation(agentId, row.scope)}
+					{@const alreadyInstalled = isCurrentLocation(agentId, row.scope)}
 					<div class="flex items-center justify-between gap-4 rounded-md border p-3">
 						<div class="flex items-center gap-3">
-							{#if !hasSkillRoots}
+							{#if alreadyInstalled}
 								<Tooltip.Root>
 									<Tooltip.Trigger>
 										<div class="flex items-center gap-3 opacity-50">
 											<Checkbox checked={false} disabled />
-											<span class="font-medium">{agentId}</span>
-										</div>
-									</Tooltip.Trigger>
-									<Tooltip.Content>No verified skill location for this agent</Tooltip.Content>
-								</Tooltip.Root>
-							{:else if alreadyInstalled}
-								<Tooltip.Root>
-									<Tooltip.Trigger>
-										<div class="flex items-center gap-3 opacity-50">
-											<Checkbox checked={false} disabled />
-											<span class="font-medium">{agentId}</span>
+											<span class="font-medium"
+												><AgentMark agent={agentId} label={SKILL_SOURCE_LABELS[agentId]} /></span
+											>
 										</div>
 									</Tooltip.Trigger>
 									<Tooltip.Content>Already installed here</Tooltip.Content>
@@ -184,34 +189,34 @@
 										row.enabled = value === true;
 									}}
 								/>
-								<Label for={`skill-install-target-${agentId}`} class="font-medium">{agentId}</Label>
+								<Label for={`skill-install-target-${agentId}`} class="font-medium"
+									><AgentMark agent={agentId} label={SKILL_SOURCE_LABELS[agentId]} /></Label
+								>
 							{/if}
 						</div>
 
-						{#if hasSkillRoots && !alreadyInstalled}
-							<Select.Root
-								type="single"
-								value={row.scope}
-								onValueChange={(value) => {
-									if (value) row.scope = value as Scope;
-								}}
-							>
-								<Select.Trigger class="w-32" disabled={!row.enabled}>
-									{scopeLabel(row.scope)}
-								</Select.Trigger>
-								<Select.Content>
-									<Select.Item value="global" disabled={isCurrentLocation(agentId, "global")}>
-										Global
-									</Select.Item>
-									<Select.Item
-										value="project"
-										disabled={!projectId || isCurrentLocation(agentId, "project")}
-									>
-										Project
-									</Select.Item>
-								</Select.Content>
-							</Select.Root>
-						{/if}
+						<Select.Root
+							type="single"
+							value={row.scope}
+							onValueChange={(value) => {
+								if (value) row.scope = value as Scope;
+							}}
+						>
+							<Select.Trigger class="w-32" disabled={installing}>
+								{scopeLabel(row.scope)}
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="global" disabled={isCurrentLocation(agentId, "global")}>
+									Global
+								</Select.Item>
+								<Select.Item
+									value="project"
+									disabled={!projectId || isCurrentLocation(agentId, "project")}
+								>
+									Project
+								</Select.Item>
+							</Select.Content>
+						</Select.Root>
 					</div>
 				{/each}
 			</div>

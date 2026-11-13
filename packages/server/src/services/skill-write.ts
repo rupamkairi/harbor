@@ -1,5 +1,6 @@
+import { skillOrigin } from "./skill-origin";
 import { randomUUID } from "node:crypto";
-import { realpath } from "node:fs/promises";
+import { lstat, realpath } from "node:fs/promises";
 import type { InstallTarget, MultiTargetResponse, TargetResult } from "@harbor/shared";
 import type { Db } from "../db/client";
 import { copyDirReplace, removeDir } from "../lib/fs-safe";
@@ -43,6 +44,7 @@ export interface InstallSkillFromDirInput {
   skillName: string;
   targets: InstallTarget[];
   source: InstallSourceMeta;
+  overwrite?: boolean;
 }
 
 /**
@@ -56,6 +58,7 @@ export async function installSkillFromDir(
 ): Promise<MultiTargetResponse> {
   const results: TargetResult[] = [];
   const rescanKeys = new Set<string>();
+  const installedDestinations = new Set<string>();
 
   for (const target of input.targets) {
     const resolution = await resolveSkillRootTarget(db, target, input.skillName);
@@ -65,7 +68,16 @@ export async function installSkillFromDir(
     }
 
     try {
-      await copyDirReplace(input.sourceDir, resolution.dest);
+      if (input.overwrite === false && !installedDestinations.has(resolution.dest) &&
+        await lstat(resolution.dest).catch(() => null)) {
+        results.push({ target, ok: false, installedPath: null,
+          error: "A skill already exists here. Choose another target or manage the existing copy first." });
+        continue;
+      }
+      if (!installedDestinations.has(resolution.dest)) {
+        await copyDirReplace(input.sourceDir, resolution.dest);
+        installedDestinations.add(resolution.dest);
+      }
       const { dirHash } = await hashDir(resolution.dest);
       await db.run(
         `INSERT INTO skill_installs
@@ -77,7 +89,7 @@ export async function installSkillFromDir(
           target.agentId,
           target.scope,
           target.projectId ?? null,
-          resolution.dest,
+          await realpath(resolution.dest),
           JSON.stringify(input.source),
           dirHash,
           new Date().toISOString(),
@@ -115,11 +127,12 @@ export async function installSkillFromResource(
   if (!resource || resource.kind !== "skill") return null;
 
   const skillName = resource.skill.name ?? resource.skill.dirName;
+  const origin = await skillOrigin(db, resource, resource.skill.name);
   return installSkillFromDir(db, {
     sourceDir: resource.path,
     skillName,
     targets,
-    source: { kind: "resource", resourceId },
+    source: { kind: "resource", resourceId, repository: origin?.repository },
   });
 }
 
